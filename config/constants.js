@@ -7,6 +7,7 @@ const constants={
     IS_IOS: Platform.OS==="ios",
     IS_DEBUG_MODE_ENABLED: Boolean(window.navigator.userAgent),
     GET_USER_URL:'http://192.168.0.10/siprenta_lite/public/api/user',
+    GET_USER_CHECKIN_URL:'http://192.168.0.10/siprenta_lite/public/api/checkin',
 };
 
 export default constants;
