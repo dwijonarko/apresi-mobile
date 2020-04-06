@@ -1,114 +1,139 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import * as React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
+import AsyncStorage from '@react-native-community/async-storage';
+import LoginScreen from './pages/Login';
+import HomeScreen from './pages/Home';
+import LoadingScreen from './components/Loading';
+const Stack = createStackNavigator();
+export const AuthContext = React.createContext();
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-const App: () => React$Node = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+export default function App({navigation}) {
+  const [state, dispatch] = React.useReducer(
+    (prevState, action) => {
+      switch (action.type) {
+        case 'RESTORE_TOKEN':
+          return {
+            ...prevState,
+            userToken: action.token,
+            isLoading: false,
+          };
+        case 'SIGN_IN':
+          return {
+            ...prevState,
+            isSignout: false,
+            userToken: action.token,
+            status: action.status,
+          };
+        case 'SIGN_OUT':
+          return {
+            ...prevState,
+            isSignout: true,
+            userToken: null,
+          };
+        default:
+          return state;
+      }
+    },
+    {
+      isLoading: true,
+      isSignout: false,
+      userToken: null,
+      status: '',
+      username: '',
+    },
   );
-};
 
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
+  React.useEffect(() => {
+    // Fetch the token from storage then navigate to our appropriate place
+    const bootstrapAsync = async () => {
+      let userToken;
 
-export default App;
+      try {
+        userToken = await AsyncStorage.getItem('userToken');
+      } catch (e) {
+        console.log(e);
+      }
+      dispatch({type: 'RESTORE_TOKEN', token: userToken});
+    };
+
+    bootstrapAsync();
+  }, []);
+
+  const authContext = React.useMemo(
+    () => ({
+      signIn: async data => {
+        dispatch({type: 'SIGN_IN', isLoading: true});
+        if (data.username === '' || data.password === '') {
+          dispatch({
+            type: 'SIGN_IN',
+            status: 'Username / Password tidak boleh kosong',
+            isLoading: false,
+          });
+          return;
+        }
+        fetch('http://192.168.0.10/siprenta_lite/public/api/login', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: data.username,
+            password: data.password,
+            token: 'siprenta',
+          }),
+        })
+          .then(response => response.json())
+          .then(json => {
+            if (json.errors === false) {
+              dispatch({type: 'SIGN_IN', token: json.token});
+              try {
+                AsyncStorage.setItem('userToken', json.token);
+              } catch (e) {
+                console.log(e);
+              }
+            } else {
+              // console.log(json);
+              dispatch({type: 'SIGN_IN', status: json.errors});
+            }
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      },
+      signOut: async () => {
+        dispatch({type: 'SIGN_OUT'});
+        try {
+          await AsyncStorage.removeItem('userToken');
+        } catch (e) {
+          console.log(e);
+        }
+      },
+    }),
+    [],
+  );
+
+  if (state.isLoading) {
+    return <LoadingScreen />;
+  }
+  return (
+    <NavigationContainer>
+      <AuthContext.Provider value={authContext}>
+        <Stack.Navigator>
+          {state.userToken == null ? (
+            <Stack.Screen name="Login" options={{headerShown: false}}>
+              {props => <LoginScreen {...props} status={state.status} />}
+            </Stack.Screen>
+          ) : (
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{headerShown: false}}
+            />
+          )}
+        </Stack.Navigator>
+      </AuthContext.Provider>
+    </NavigationContainer>
+  );
+}
