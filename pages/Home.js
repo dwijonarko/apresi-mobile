@@ -137,7 +137,7 @@ export default function Home() {
                 <Button
                   icon={{
                     name: 'edit',
-                    size: 10,
+                    size: 15,
                     color: 'white',
                   }}
                   title="Checkin"
@@ -146,7 +146,7 @@ export default function Home() {
                 <Button
                   icon={{
                     name: 'exit-to-app',
-                    size: 10,
+                    size: 15,
                     color: 'white',
                   }}
                   title="Logout"
