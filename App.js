@@ -4,7 +4,11 @@ import {createStackNavigator} from '@react-navigation/stack';
 import AsyncStorage from '@react-native-community/async-storage';
 import LoginScreen from './pages/Login';
 import HomeScreen from './pages/Home';
+import CheckinScreen from './pages/Checkin';
 import LoadingScreen from './components/Loading';
+import Header from './components/Header';
+import LogoTitle from './components/LogoTitle';
+import constants from './config/constants';
 const Stack = createStackNavigator();
 export const AuthContext = React.createContext();
 
@@ -72,7 +76,7 @@ export default function App({navigation}) {
           });
           return;
         }
-        fetch('http://192.168.0.10/siprenta_lite/public/api/login', {
+        fetch(constants.POST_LOGIN_URL, {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -120,19 +124,31 @@ export default function App({navigation}) {
   return (
     <NavigationContainer>
       <AuthContext.Provider value={authContext}>
-        <Stack.Navigator>
-          {state.userToken == null ? (
+        {state.userToken == null ? (
+          <Stack.Navigator>
             <Stack.Screen name="Login" options={{headerShown: false}}>
               {props => <LoginScreen {...props} status={state.status} />}
             </Stack.Screen>
-          ) : (
+          </Stack.Navigator>
+        ) : (
+          <Stack.Navigator>
             <Stack.Screen
               name="Home"
               component={HomeScreen}
-              options={{headerShown: false}}
+              options={{
+                headerTitle: props => <LogoTitle {...props} />,
+                headerRight: () => <Header />,
+              }}
             />
-          )}
-        </Stack.Navigator>
+            <Stack.Screen
+              name="Checkin"
+              component={CheckinScreen}
+              options={{
+                headerRight: () => <Header />,
+              }}
+            />
+          </Stack.Navigator>
+        )}
       </AuthContext.Provider>
     </NavigationContainer>
   );

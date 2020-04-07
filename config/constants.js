@@ -7,6 +7,7 @@ const constants = {
   IS_IOS: Platform.OS === 'ios',
   IS_DEBUG_MODE_ENABLED: Boolean(window.navigator.userAgent),
   BASE_URL: base_url,
+  POST_LOGIN_URL: base_url + 'api/login',
   GET_USER_URL: base_url + 'api/user',
   GET_USER_CHECKIN_URL: base_url + 'api/checkin',
 };

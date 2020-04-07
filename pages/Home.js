@@ -1,29 +1,12 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+import {StyleSheet, View, Text, FlatList, Dimensions} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import {AuthContext} from '../App';
-// import Button from '../components/Button';
 import Loading from '../components/Loading';
-import strings from '../config/strings';
 import constants from '../config/constants';
 import Moment from 'moment';
-import {
-  Avatar,
-  Card,
-  Divider,
-  Button,
-  ListItem,
-  Header,
-} from 'react-native-elements';
-import Icon from 'react-native-vector-icons/FontAwesome';
-export default function Home() {
+import {Avatar, Card, Button, ListItem} from 'react-native-elements';
+export default function Home({ navigation }) {
   const {signOut} = React.useContext(AuthContext);
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
@@ -108,16 +91,8 @@ export default function Home() {
   return isLoading ? (
     <Loading />
   ) : (
-    <View style={{marginTop: Platform.OS === 'ios' ? 0 : -20}}>
-      <Header
-        backgroundColor="#f5f5f5"
-        leftComponent={{icon: 'menu', color: '#3b3b3b'}}
-        centerComponent={{
-          text: 'Home',
-          style: {color: '#3b3b3b', fontSize: 16, fontWeight: 'bold'},
-        }}
-        rightComponent={{icon: 'settings', color: '#3b3b3b'}}
-      />
+    <View style={{flex:1}}>
+      
       <Card>
         {
           <View style={styles.user}>
@@ -142,6 +117,7 @@ export default function Home() {
                   }}
                   title="Checkin"
                   buttonStyle={{backgroundColor: '#2196f3'}}
+                  onPress={() => navigation.navigate('Checkin')}
                 />
                 <Button
                   icon={{
