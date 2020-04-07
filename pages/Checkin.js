@@ -7,27 +7,157 @@ import {
   Dimensions,
   SafeAreaView,
   ScrollView,
+  Platform,
+  PermissionsAndroid,
+  ToastAndroid,
 } from 'react-native';
-import MapView from 'react-native-maps';
-import gmaps from '../assets/images/gmaps.jpg';
+import MapView, {Marker} from 'react-native-maps';
+import Geolocation from 'react-native-geolocation-service';
 import snap from '../assets/images/snap.png';
+import Loading from '../components/Loading';
+import AsyncStorage from '@react-native-community/async-storage';
+import constants from '../config/constants';
+import {Card, Button} from 'react-native-elements';
+const Checkin = ({route, navigation}) => {
+  const {user_id} = route.params;
+  const [userToken, setUserToken] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [location, setLocation] = React.useState([]);
 
-import {Card, Button, ListItem, Header} from 'react-native-elements';
-const Checkin = ({navigation}) => {
-  return (
+  const hasLocationPermission = async () => {
+    if (
+      Platform.OS === 'ios' ||
+      (Platform.OS === 'android' && Platform.Version < 23)
+    ) {
+      return true;
+    }
+
+    const hasPermission = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+    if (hasPermission) {
+      return true;
+    }
+    const status = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+
+    if (status === PermissionsAndroid.RESULTS.GRANTED) {
+      return true;
+    }
+    if (status === PermissionsAndroid.RESULTS.DENIED) {
+      ToastAndroid.show(
+        'Location permission denied by user.',
+        ToastAndroid.LONG,
+      );
+    } else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+      ToastAndroid.show(
+        'Location permission revoked by user.',
+        ToastAndroid.LONG,
+      );
+    }
+
+    return false;
+  };
+
+  React.useEffect(() => {
+    const getLocation = async () => {
+      if (hasLocationPermission()) {
+        await Geolocation.getCurrentPosition(
+          position => {
+            setLocation(position);
+            if (location != null) {
+              setIsLoading(false);
+            }
+          },
+          error => {
+            console.log(error);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 10000,
+            distanceFilter: 50,
+            forceRequestLocation: true,
+          },
+        );
+      }
+    };
+    let token;
+    const bootstrapAsync = async () => {
+      try {
+        token = await AsyncStorage.getItem('userToken');
+        setUserToken(token);
+        getLocation();
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    bootstrapAsync();
+  }, []);
+
+  const postCheckin = () => {
+    fetch(constants.POST_USER_CHECKIN_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + userToken,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: user_id,
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        type: 1,
+        token: 'siprenta',
+      }),
+    })
+      .then(response => response.json())
+      .then(json => {
+        console.log(json);
+        if(json.errors){
+            ToastAndroid.show(
+                json.message,
+                ToastAndroid.LONG,
+              );
+        }else{
+            ToastAndroid.show(
+                'Data berhasil disimpan.',
+                ToastAndroid.LONG,
+              );
+              navigation.navigate('Home')
+        }
+        
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    //   console.log(location);
+  };
+  return isLoading ? (
+    <Loading />
+  ) : (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView>
         <Card>
           <View style={{width: '100%', height: 200}}>
             <MapView
-            style={styles.map}
+              style={styles.map}
               initialRegion={{
-                latitude: 37.78825,
-                longitude: -122.4324,
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
-              }}
-            />
+              }}>
+              <Marker
+                coordinate={{
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                }}
+                title="Your Location"
+                // description={marker.description}
+              />
+            </MapView>
           </View>
         </Card>
         <Card>
@@ -75,6 +205,7 @@ const Checkin = ({navigation}) => {
             }}
             title="Checkin"
             buttonStyle={{backgroundColor: '#00bcd4', width: 150}}
+            onPress={postCheckin}
           />
           <Button
             icon={{

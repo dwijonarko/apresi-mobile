@@ -1,20 +1,32 @@
 import React from 'react';
-import {StyleSheet, View, Text, FlatList, Dimensions} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  Dimensions,
+  SafeAreaView,
+  RefreshControl,
+} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import {AuthContext} from '../App';
 import Loading from '../components/Loading';
 import constants from '../config/constants';
 import Moment from 'moment';
 import {Avatar, Card, Button, ListItem} from 'react-native-elements';
-export default function Home({ navigation }) {
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+export default function Home({navigation}) {
   const {signOut} = React.useContext(AuthContext);
+  const [user_id, setUserId] = React.useState('');
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [avatar, setAvatar] = React.useState('');
   const [data, setData] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [token, setToken] = React.useState(true);
 
-  const getUser = async userToken => {
+  const getUser = userToken => {
     fetch(constants.GET_USER_URL, {
       headers: {
         Authorization: 'Bearer ' + userToken,
@@ -24,16 +36,17 @@ export default function Home({ navigation }) {
     })
       .then(response => response.json())
       .then(json => {
+        // console.log(json);
+        setUserId(json.id);
         setName(json.name);
         setEmail(json.email);
         setAvatar(json.avatar);
-        setIsLoading(false);
       })
       .catch(error => {
         console.error(error);
       });
   };
-  const getUserCheckin = async userToken => {
+  const getUserCheckin = userToken => {
     fetch(constants.GET_USER_CHECKIN_URL, {
       headers: {
         Authorization: 'Bearer ' + userToken,
@@ -44,7 +57,6 @@ export default function Home({ navigation }) {
       .then(response => response.json())
       .then(json => {
         setData(json);
-        setIsLoading(false);
         // console.log(json);
       })
       .catch(error => {
@@ -52,18 +64,16 @@ export default function Home({ navigation }) {
       });
   };
   React.useEffect(() => {
-    let userToken;
-    const bootstrapAsync = async () => {
-      try {
-        userToken = await AsyncStorage.getItem('userToken');
+    AsyncStorage.getItem('userToken', (error, userToken) => {
+      console.log(userToken);
+      setToken(userToken);
+      if (userToken) {
         getUser(userToken);
         getUserCheckin(userToken);
-      } catch (e) {
-        console.log(e);
+        setIsLoading(false);
       }
-    };
-    bootstrapAsync();
-  }, [setEmail, setName, setData]);
+    });
+  }, []);
 
   const renderItem = item => {
     let date = Moment(item.created_at).format('DD-MMMM-YYYY HH:mm');
@@ -88,11 +98,28 @@ export default function Home({ navigation }) {
     return <View style={styles.line} />;
   };
 
+  const refreshList = () => {
+    fetch(constants.GET_USER_CHECKIN_URL, {
+      headers: {
+        Authorization: 'Bearer ' + token,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => response.json())
+      .then(json => {
+        setData(json);
+        // console.log(json);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
   return isLoading ? (
     <Loading />
   ) : (
-    <View style={{flex:1}}>
-      
+    <View style={{flex: 1}}>
       <Card>
         {
           <View style={styles.user}>
@@ -117,7 +144,9 @@ export default function Home({ navigation }) {
                   }}
                   title="Checkin"
                   buttonStyle={{backgroundColor: '#2196f3'}}
-                  onPress={() => navigation.navigate('Checkin')}
+                  onPress={() =>
+                    navigation.navigate('Checkin', {user_id: user_id})
+                  }
                 />
                 <Button
                   icon={{
@@ -134,8 +163,23 @@ export default function Home({ navigation }) {
           </View>
         }
       </Card>
-      <Card>
-        <Text style={{marginTop: 25, marginBottom: 10, fontWeight: 'bold'}}>
+      <SafeAreaView
+        style={{
+          height: '60%',
+          marginTop: 10,
+          marginHorizontal: 16,
+          backgroundColor: 'white',
+        }}>
+        <Text
+          style={{
+            marginTop: 10,
+            paddingBottom: 15,
+            fontWeight: 'bold',
+            fontSize: 20,
+            paddingHorizontal: 10,
+            borderBottomColor: '#f0f0f0',
+            borderBottomWidth: 1,
+          }}>
           Data Checkin Terakhir Anda
         </Text>
         <FlatList
@@ -143,8 +187,17 @@ export default function Home({ navigation }) {
           renderItem={({item}) => renderItem(item)}
           keyExtractor={item => item.id.toString()}
           ItemSeparatorComponent={FlatListItemSeparator}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={refreshList} />
+          }
         />
-      </Card>
+      </SafeAreaView>
+      <View style={styles.footer}>
+        <Text>
+          Build with{' '}
+          <Icon raised name="heart" type="font-awesome" color="#f50" />{' '} From Limakode
+        </Text>
+      </View>
     </View>
   );
 }
@@ -179,5 +232,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'stretch',
   },
-  userAvatar: {},
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent:"center",
+    flexDirection:"row",
+    width: '100%',
+  },
 });
