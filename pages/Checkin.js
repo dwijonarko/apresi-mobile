@@ -1,22 +1,34 @@
 import React from 'react';
-import {View, Text, StyleSheet, Image, Dimensions,SafeAreaView, ScrollView} from 'react-native';
-import Loading from '../components/Loading';
-import constants from '../config/constants';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+} from 'react-native';
+import MapView from 'react-native-maps';
 import gmaps from '../assets/images/gmaps.jpg';
 import snap from '../assets/images/snap.png';
 
 import {Card, Button, ListItem, Header} from 'react-native-elements';
 const Checkin = ({navigation}) => {
   return (
-    <SafeAreaView style={{flex:1}}>
-      
-    <ScrollView>
+    <SafeAreaView style={{flex: 1}}>
+      <ScrollView>
         <Card>
-          <Image
-            source={gmaps}
-            resizeMode={'cover'}
-            style={{width: '100%', height: 200}}
-          />
+          <View style={{width: '100%', height: 200}}>
+            <MapView
+            style={styles.map}
+              initialRegion={{
+                latitude: 37.78825,
+                longitude: -122.4324,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }}
+            />
+          </View>
         </Card>
         <Card>
           <View
@@ -86,9 +98,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     alignItems: 'center',
   },
-  line: {
-    height: 5,
-    marginVertical: 2,
+  map: {
+    width: '100%',
+    height: 200,
   },
   box: {
     backgroundColor: '#b3e5fc',
