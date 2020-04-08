@@ -3,14 +3,14 @@ import {Image, StyleSheet, View, Text} from 'react-native';
 import colors from '../config/colors';
 import strings from '../config/strings';
 import imageLogo from '../assets/images/logo.png';
-import Button from '../components/Button';
 import FormTextInput from '../components/FormTextInput';
+import Button from '../components/Button';
 import {AuthContext} from '../App';
 
 export default function LoginScreen(props) {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
-
+  const [isLoading,setIsLoading]= React.useState(false);
   const {signIn} = React.useContext(AuthContext);
   return (
     <View style={styles.container}>
@@ -28,9 +28,11 @@ export default function LoginScreen(props) {
           placeholder={strings.PASSWORD_PLACEHOLDER}
           secureTextEntry={true}
         />
+        
         <Button
-          label={strings.LOGIN}
+          title="Sign In"
           onPress={() => signIn({username, password})}
+          isLoading={props.status==='loading'?true:false}
         />
       </View>
     </View>

@@ -68,7 +68,7 @@ export default function App({navigation}) {
   const authContext = React.useMemo(
     () => ({
       signIn: async data => {
-        dispatch({type: 'SIGN_IN', isLoading: true});
+        dispatch({type: 'SIGN_IN', isLoading: true,status:'loading'});
         if (data.username === '' || data.password === '') {
           dispatch({
             type: 'SIGN_IN',
