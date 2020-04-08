@@ -7,6 +7,7 @@ import HomeScreen from './pages/Home';
 import CheckinScreen from './pages/Checkin';
 import LoadingScreen from './components/Loading';
 import Header from './components/Header';
+import CameraScreen from './pages/Camera';
 import LogoTitle from './components/LogoTitle';
 import constants from './config/constants';
 const Stack = createStackNavigator();
@@ -146,6 +147,11 @@ export default function App({navigation}) {
               options={{
                 headerRight: () => <Header />,
               }}
+            />
+            <Stack.Screen
+              name="Camera"
+              component={CameraScreen}
+              options={{headerShown: false}}
             />
           </Stack.Navigator>
         )}

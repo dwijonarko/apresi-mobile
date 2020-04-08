@@ -10,19 +10,26 @@ import {
   Platform,
   PermissionsAndroid,
   ToastAndroid,
+  TouchableOpacity,
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
-import snap from '../assets/images/snap.png';
 import Loading from '../components/Loading';
 import AsyncStorage from '@react-native-community/async-storage';
 import constants from '../config/constants';
 import {Card, Button} from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { useFocusEffect } from '@react-navigation/native';
+
+
 const Checkin = ({route, navigation}) => {
   const {user_id} = route.params;
+  const {image_data_front} = route.params;
+  const {image_data_back} = route.params;
   const [userToken, setUserToken] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
   const [location, setLocation] = React.useState([]);
+  const [imageData,setImageData] = React.useState('');
 
   const hasLocationPermission = async () => {
     if (
@@ -60,6 +67,13 @@ const Checkin = ({route, navigation}) => {
     return false;
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      setImageData(image_data_front);
+      // console.log(image_data);
+    }, [imageData])
+  );
+
   React.useEffect(() => {
     const getLocation = async () => {
       if (hasLocationPermission()) {
@@ -96,6 +110,7 @@ const Checkin = ({route, navigation}) => {
     bootstrapAsync();
   }, []);
 
+  
   const postCheckin = () => {
     fetch(constants.POST_USER_CHECKIN_URL, {
       method: 'POST',
@@ -115,19 +130,12 @@ const Checkin = ({route, navigation}) => {
       .then(response => response.json())
       .then(json => {
         console.log(json);
-        if(json.errors){
-            ToastAndroid.show(
-                json.message,
-                ToastAndroid.LONG,
-              );
-        }else{
-            ToastAndroid.show(
-                'Data berhasil disimpan.',
-                ToastAndroid.LONG,
-              );
-              navigation.navigate('Home')
+        if (json.errors) {
+          ToastAndroid.show(json.message, ToastAndroid.LONG);
+        } else {
+          ToastAndroid.show('Data berhasil disimpan.', ToastAndroid.LONG);
+          navigation.navigate('Home');
         }
-        
       })
       .catch(error => {
         console.error(error);
@@ -146,8 +154,8 @@ const Checkin = ({route, navigation}) => {
               initialRegion={{
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
+                latitudeDelta: 0.0043,
+                longitudeDelta: 0.0034,
               }}>
               <Marker
                 coordinate={{
@@ -171,21 +179,66 @@ const Checkin = ({route, navigation}) => {
             <Text style={{textAlign: 'center', fontWeight: 'bold'}}>
               Please attach your image
             </Text>
+
           </View>
           <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
             <Card>
-              <Image
-                source={snap}
-                resizeMode={'cover'}
-                style={{width: 100, height: 200}}
-              />
+              <View style={styles.camera}>
+                <Image
+                  source={{uri: `data:image/png;base64,${image_data_front}`}}
+                  style={styles.preview}
+                />
+                <View
+                  style={{
+                    flex: 0,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    marginTop:-20
+                  }}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate('Camera', {type: 'front'})
+                    }
+                    style={styles.capture}>
+                    <Icon
+                      raised
+                      name="camera"
+                      size={30}
+                      type="font-awesome"
+                      color="#000"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </Card>
             <Card>
+              <View style={styles.camera}>
               <Image
-                source={snap}
-                resizeMode={'cover'}
-                style={{width: 100, height: 200}}
-              />
+                  source={{uri: `data:image/png;base64,${image_data_back}`}}
+                  style={styles.preview}
+                />
+                <View
+                  style={{
+                    flex: 0,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    marginTop:-20
+                  }}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate('Camera', {type: 'back'})
+                    }
+                    style={styles.capture}>
+                    <Icon
+                      raised
+                      name="camera"
+                      size={30}
+                      type="font-awesome"
+                      color="#000"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </Card>
           </View>
         </Card>
@@ -249,7 +302,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'stretch',
   },
-  userAvatar: {},
+  camera: {
+    width: 100,
+    height: 200,
+  },
+  preview: {
+    width: 100,
+    height: 200,
+  },
 });
 
 export default Checkin;

@@ -135,7 +135,7 @@ export default function Home({navigation}) {
               <Text style={styles.titleText}>{name}</Text>
               <Text style={styles.titleText}>{email}</Text>
               <View
-                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                style={{flexDirection: 'row', justifyContent: 'space-around'}}>
                 <Button
                   icon={{
                     name: 'edit',
@@ -143,6 +143,7 @@ export default function Home({navigation}) {
                     color: 'white',
                   }}
                   title="Checkin"
+                  titleStyle={{fontSize: 12}}
                   buttonStyle={{backgroundColor: '#2196f3'}}
                   onPress={() =>
                     navigation.navigate('Checkin', {user_id: user_id})
@@ -155,6 +156,7 @@ export default function Home({navigation}) {
                     color: 'white',
                   }}
                   title="Logout"
+                  titleStyle={{fontSize: 12}}
                   buttonStyle={{backgroundColor: '#e57373'}}
                   onPress={signOut}
                 />
