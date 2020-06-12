@@ -9,7 +9,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import {AuthContext} from '../App';
 import Loading from '../components/Loading';
 import constants from '../config/constants';
 import Moment from 'moment';
@@ -17,7 +16,6 @@ import {Avatar, Card, Button, ListItem} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function Home({navigation}) {
-  const {signOut} = React.useContext(AuthContext);
   const [user_id, setUserId] = React.useState('');
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
@@ -65,7 +63,7 @@ export default function Home({navigation}) {
   };
   React.useEffect(() => {
     AsyncStorage.getItem('userToken', (error, userToken) => {
-      console.log(userToken);
+      // console.log(userToken);
       setToken(userToken);
       if (userToken) {
         getUser(userToken);
@@ -89,6 +87,16 @@ export default function Home({navigation}) {
           }
           bottomDivider
           chevron={{color: 'black'}}
+          onPress={() =>
+            navigation.navigate('Detail', {
+              id: item.id,
+              latitude: item.latitude,
+              longitude: item.longitude,
+              date: date,
+              image_front: item.image_front,
+              image_back: item.image_back
+            })
+          }
         />
       </View>
     );
@@ -144,22 +152,12 @@ export default function Home({navigation}) {
                   }}
                   title="Checkin"
                   titleStyle={{fontSize: 12}}
-                  buttonStyle={{backgroundColor: '#2196f3'}}
+                  buttonStyle={{backgroundColor: '#2196f3',paddingHorizontal:50}}
                   onPress={() =>
                     navigation.navigate('Checkin', {user_id: user_id})
                   }
                 />
-                <Button
-                  icon={{
-                    name: 'exit-to-app',
-                    size: 15,
-                    color: 'white',
-                  }}
-                  title="Logout"
-                  titleStyle={{fontSize: 12}}
-                  buttonStyle={{backgroundColor: '#e57373'}}
-                  onPress={signOut}
-                />
+                
               </View>
             </View>
           </View>
@@ -197,7 +195,8 @@ export default function Home({navigation}) {
       <View style={styles.footer}>
         <Text>
           Build with{' '}
-          <Icon raised name="heart" type="font-awesome" color="#f50" />{' '} From Limakode
+          <Icon raised name="heart" type="font-awesome" color="#f50" /> From
+          @dwijonarko
         </Text>
       </View>
     </View>

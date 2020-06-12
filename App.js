@@ -8,6 +8,7 @@ import CheckinScreen from './pages/Checkin';
 import LoadingScreen from './components/Loading';
 import Header from './components/Header';
 import CameraScreen from './pages/Camera';
+import DetailScreen from './pages/Detail';
 import LogoTitle from './components/LogoTitle';
 import constants from './config/constants';
 const Stack = createStackNavigator();
@@ -144,6 +145,13 @@ export default function App({navigation}) {
             <Stack.Screen
               name="Checkin"
               component={CheckinScreen}
+              options={{
+                headerRight: () => <Header />,
+              }}
+            />
+            <Stack.Screen
+              name="Detail"
+              component={DetailScreen}
               options={{
                 headerRight: () => <Header />,
               }}

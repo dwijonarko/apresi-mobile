@@ -1,6 +1,6 @@
 import {Platform} from 'react-native';
 
-let base_url = 'http://192.168.0.10/siprenta_lite/public/';
+let base_url = 'https://dwijonarko.my.id/';
 const constants = {
   IS_ENV_DEVELOPMENT: __DEV__,
   IS_ANDROID: Platform.OS === 'android',

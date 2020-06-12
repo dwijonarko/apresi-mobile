@@ -21,8 +21,8 @@ def flipper_post_install(installer)
   end
 end
 
-target 'SiprentaLite' do
-  # Pods for SiprentaLite
+target 'Absensi' do
+  # Pods for Absensi
   pod 'FBLazyVector', :path => "../node_modules/react-native/Libraries/FBLazyVector"
   pod 'FBReactNativeSpec', :path => "../node_modules/react-native/Libraries/FBReactNativeSpec"
   pod 'RCTRequired', :path => "../node_modules/react-native/Libraries/RCTRequired"
@@ -54,7 +54,7 @@ target 'SiprentaLite' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  target 'SiprentaLiteTests' do
+  target 'AbsensiTests' do
     inherit! :complete
     # Pods for testing
   end
@@ -71,10 +71,10 @@ target 'SiprentaLite' do
   end
 end
 
-target 'SiprentaLite-tvOS' do
-  # Pods for SiprentaLite-tvOS
+target 'Absensi-tvOS' do
+  # Pods for Absensi-tvOS
 
-  target 'SiprentaLite-tvOSTests' do
+  target 'Absensi-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end

@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-               BuildableName = "SiprentaLite-tvOS.app"
-               BlueprintName = "SiprentaLite-tvOS"
-               ReferencedContainer = "container:SiprentaLite.xcodeproj">
+               BuildableName = "Absensi-tvOS.app"
+               BlueprintName = "Absensi-tvOS"
+               ReferencedContainer = "container:Absensi.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D02E48F1E0B4A5D006451C7"
-               BuildableName = "SiprentaLite-tvOSTests.xctest"
-               BlueprintName = "SiprentaLite-tvOSTests"
-               ReferencedContainer = "container:SiprentaLite.xcodeproj">
+               BuildableName = "Absensi-tvOSTests.xctest"
+               BlueprintName = "Absensi-tvOSTests"
+               ReferencedContainer = "container:Absensi.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-            BuildableName = "SiprentaLite-tvOS.app"
-            BlueprintName = "SiprentaLite-tvOS"
-            ReferencedContainer = "container:SiprentaLite.xcodeproj">
+            BuildableName = "Absensi-tvOS.app"
+            BlueprintName = "Absensi-tvOS"
+            ReferencedContainer = "container:Absensi.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-            BuildableName = "SiprentaLite-tvOS.app"
-            BlueprintName = "SiprentaLite-tvOS"
-            ReferencedContainer = "container:SiprentaLite.xcodeproj">
+            BuildableName = "Absensi-tvOS.app"
+            BlueprintName = "Absensi-tvOS"
+            ReferencedContainer = "container:Absensi.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

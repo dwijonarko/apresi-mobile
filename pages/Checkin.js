@@ -19,9 +19,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import constants from '../config/constants';
 import {Card, Button} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useFocusEffect } from '@react-navigation/native';
-
-
+import {useFocusEffect} from '@react-navigation/native';
+import CheckinButton from '../components/CheckinButton';
 const Checkin = ({route, navigation}) => {
   const {user_id} = route.params;
   const {image_data_front} = route.params;
@@ -29,7 +28,7 @@ const Checkin = ({route, navigation}) => {
   const [userToken, setUserToken] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
   const [location, setLocation] = React.useState([]);
-  const [imageData,setImageData] = React.useState('');
+  const [imageData, setImageData] = React.useState('');
 
   const hasLocationPermission = async () => {
     if (
@@ -70,13 +69,12 @@ const Checkin = ({route, navigation}) => {
   useFocusEffect(
     React.useCallback(() => {
       setImageData(image_data_front);
-      // console.log(image_data);
-    }, [imageData])
+    }, [imageData]),
   );
 
   React.useEffect(() => {
     const getLocation = async () => {
-      if (hasLocationPermission()) {
+      if (await hasLocationPermission()) {
         await Geolocation.getCurrentPosition(
           position => {
             setLocation(position);
@@ -85,7 +83,8 @@ const Checkin = ({route, navigation}) => {
             }
           },
           error => {
-            console.log(error);
+            setIsLoading(false);
+            // console.log(error);
           },
           {
             enableHighAccuracy: true,
@@ -110,8 +109,8 @@ const Checkin = ({route, navigation}) => {
     bootstrapAsync();
   }, []);
 
-  
   const postCheckin = () => {
+    setIsLoading(true);
     fetch(constants.POST_USER_CHECKIN_URL, {
       method: 'POST',
       headers: {
@@ -125,11 +124,14 @@ const Checkin = ({route, navigation}) => {
         longitude: location.coords.longitude,
         type: 1,
         token: 'siprenta',
+        image_front: image_data_front,
+        image_back: image_data_back,
       }),
     })
       .then(response => response.json())
       .then(json => {
         console.log(json);
+      setIsLoading(false);
         if (json.errors) {
           ToastAndroid.show(json.message, ToastAndroid.LONG);
         } else {
@@ -179,7 +181,6 @@ const Checkin = ({route, navigation}) => {
             <Text style={{textAlign: 'center', fontWeight: 'bold'}}>
               Please attach your image
             </Text>
-
           </View>
           <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
             <Card>
@@ -193,7 +194,7 @@ const Checkin = ({route, navigation}) => {
                     flex: 0,
                     flexDirection: 'row',
                     justifyContent: 'center',
-                    marginTop:-20
+                    marginTop: -20,
                   }}>
                   <TouchableOpacity
                     onPress={() =>
@@ -213,7 +214,7 @@ const Checkin = ({route, navigation}) => {
             </Card>
             <Card>
               <View style={styles.camera}>
-              <Image
+                <Image
                   source={{uri: `data:image/png;base64,${image_data_back}`}}
                   style={styles.preview}
                 />
@@ -222,7 +223,7 @@ const Checkin = ({route, navigation}) => {
                     flex: 0,
                     flexDirection: 'row',
                     justifyContent: 'center',
-                    marginTop:-20
+                    marginTop: -20,
                   }}>
                   <TouchableOpacity
                     onPress={() =>
@@ -250,15 +251,10 @@ const Checkin = ({route, navigation}) => {
             justifyContent: 'space-around',
             alignItems: 'center',
           }}>
-          <Button
-            icon={{
-              name: 'save',
-              size: 15,
-              color: 'white',
-            }}
+          <CheckinButton
             title="Checkin"
-            buttonStyle={{backgroundColor: '#00bcd4', width: 150}}
             onPress={postCheckin}
+            isDisabled={image_data_back && image_data_front ? false:true}
           />
           <Button
             icon={{
